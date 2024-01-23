@@ -29,7 +29,7 @@ int main()
 		printf("\x1b[35m%s: \x1b[0m", prompt);
 		fgets(command, 1024, stdin);
 		command[strlen(command) - 1] = '\0'; // replace \n with \0
-		if (strcmp(command, "exit") == 0 || strcmp(command, "exit()") == 0)
+		if (strcmp(command, "exit") == 0 || strcmp(command, "exit()") == 0 || strcmp(command, "quit") == 0 )
 		{
 			return 0;
 		}
