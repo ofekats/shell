@@ -19,7 +19,7 @@ int main()
 	char *argv[10];
 	char command[1024];
 	char *token;
-	char prompt[256] = "\x1b[35mMoriyaEsterAndOfek~stshell\x1b[0m";
+	char prompt[256] = "\x1b[35mHello\x1b[0m";
 
 	signal(SIGINT, handler);
 	while (1)
@@ -40,6 +40,12 @@ int main()
             continue; 
         }
 
+		else if (strncmp(command, "echo $?", 7) == 0)
+        {
+            // Print the exit status of the last command
+            printf("%d\n", status);
+			continue;
+        }
 
 		/* parse command line */
 		i = 0;
