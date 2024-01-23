@@ -37,6 +37,19 @@ Variable *findVariable(char *name)
     return NULL;
 }
 
+int addVariable(char *name, char *value){
+	if (variableCount < 100)
+	{
+		strncpy(variables[variableCount].name, name, sizeof(variables[variableCount].name) - 1);
+		variables[variableCount].name[sizeof(variables[variableCount].name) - 1] = '\0'; // Ensure null-termination
+		strncpy(variables[variableCount].value, value, sizeof(variables[variableCount].value) - 1);
+		variables[variableCount].value[sizeof(variables[variableCount].value) - 1] = '\0'; // Ensure null-termination
+		variableCount++;
+		return 0;
+	}
+	return -1;
+}
+
 int main()
 {
 	int i, amper, retid, status;
@@ -84,6 +97,34 @@ int main()
 			continue;
 		}
 
+		else if (strncmp(command, "read ", 5) == 0)
+        {
+            // Read command
+            char *varName = command + 6;
+            Variable *var = findVariable(varName);
+            if (var != NULL)
+            {
+                fgets(var->value, sizeof(var->value), stdin);
+                // Remove newline character if present
+                size_t len = strlen(var->value);
+                if (len > 0 && var->value[len - 1] == '\n')
+                {
+                    var->value[len - 1] = '\0';
+                }
+            }
+            else
+            {
+				// New variable, add it to the array
+				char value[1024];
+				fgets(value, sizeof(value), stdin);
+				if (addVariable(varName, value) != 0)
+				{
+					printf("Too many variables, cannot add more.\n");
+				}
+			}
+            continue;
+        }
+
 		else if (strchr(command, '$') != NULL)
         {
 			char *charPtr = strchr(command, '$');
@@ -94,7 +135,7 @@ int main()
 				*equalSign = '\0'; // Split the string at '='
 				char *varName = strtok(command, " ");
 				char *varValue = equalSign + 2; // equalSign is \0, equalSign + 1 is space
-				Variable *var = findVariable(varName);
+				Variable *var = findVariable(varName+1);
 				if (var != NULL)
 				{
 					// Variable already exists, update its value
@@ -104,16 +145,7 @@ int main()
 				else
 				{
 					// New variable, add it to the array
-					if (variableCount < 100)
-					{
-						strncpy(variables[variableCount].name, varName, sizeof(variables[variableCount].name) - 1);
-						variables[variableCount].name[sizeof(variables[variableCount].name) - 1] = '\0'; // Ensure null-termination
-						strncpy(variables[variableCount].value, varValue, sizeof(variables[variableCount].value) - 1);
-						variables[variableCount].value[sizeof(variables[variableCount].value) - 1] = '\0'; // Ensure null-termination
-						variableCount++;
-					}
-					else
-					{
+					if(addVariable(varName, varValue) != 0){
 						printf("Too many variables, cannot add more.\n");
 					}
 				}
@@ -121,11 +153,11 @@ int main()
 			}
             // Variable substitution
 			int index = charPtr - command; // the index of the char after the $ 
-            char *varName = command + index; // poiter to the char after the $ (name of the var)
+            char *varName = command + index + 1; // poiter to the char after the $ (name of the var)
             Variable *var = findVariable(varName);
             if (var != NULL)
             {
-                printf("%s\n", var->value);
+                printf("%s", var->value);
                 continue;
             }
             else
@@ -133,6 +165,7 @@ int main()
                 printf("Variable '%s' not found.\n", varName);
                 continue;
             }
+			continue;
         }
 
 		else if (strcmp(command, "!!") == 0)
