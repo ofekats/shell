@@ -21,6 +21,7 @@ int main()
 	char *token;
 	char prompt[256] = "\x1b[35mHello\x1b[0m";
 	char current_directory[1024];
+	char last_command[1024] = "";
 
 	signal(SIGINT, handler);
 	while (1)
@@ -58,6 +59,23 @@ int main()
 			}
 			continue;
 		}
+
+		else if (strcmp(command, "!!") == 0)
+		{
+			// Repeat the last command
+			if (strlen(last_command) > 0)
+			{
+				strcpy(command, last_command);
+				printf("Repeating last command: %s\n", command);
+			}
+			else
+			{
+				printf("No previous command to repeat.\n");
+				continue;
+			}
+		}
+		strcpy(last_command, command);
+		
 
 		/* parse command line */
 		i = 0;
