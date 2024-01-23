@@ -20,6 +20,7 @@ int main()
 	char command[1024];
 	char *token;
 	char prompt[256] = "\x1b[35mHello\x1b[0m";
+	char current_directory[1024];
 
 	signal(SIGINT, handler);
 	while (1)
@@ -46,6 +47,17 @@ int main()
             printf("%d\n", status);
 			continue;
         }
+
+		else if (strncmp(command, "cd ", 3) == 0)
+		{
+			// Change current working directory
+			char *new_directory = command + 3;
+			if (chdir(new_directory) != 0)
+			{
+				perror("Error");
+			}
+			continue;
+		}
 
 		/* parse command line */
 		i = 0;
