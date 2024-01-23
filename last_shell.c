@@ -14,6 +14,29 @@ void handler(int num)
 	printf("\nYou typed Control-C!\n");
 }
 
+// Structure to store variables
+typedef struct
+{
+    char name[256]; 
+    char value[1024];
+} Variable;
+
+Variable variables[100]; // Array to store variables
+int variableCount = 0;   // Counter for the number of variables
+
+// Function to find a variable by name
+Variable *findVariable(char *name)
+{
+    for (int i = 0; i < variableCount; i++)
+    {
+        if (strcmp(variables[i].name, name) == 0)
+        {
+            return &variables[i];
+        }
+    }
+    return NULL;
+}
+
 int main()
 {
 	int i, amper, retid, status;
@@ -61,6 +84,57 @@ int main()
 			continue;
 		}
 
+		else if (strchr(command, '$') != NULL)
+        {
+			char *charPtr = strchr(command, '$');
+			char *equalSign = strchr(command, '=');
+			if (equalSign != NULL)
+			{
+				// Variable assignment
+				*equalSign = '\0'; // Split the string at '='
+				char *varName = strtok(command, " ");
+				char *varValue = equalSign + 2; // equalSign is \0, equalSign + 1 is space
+				Variable *var = findVariable(varName);
+				if (var != NULL)
+				{
+					// Variable already exists, update its value
+					strncpy(var->value, varValue, sizeof(var->value) - 1);
+					var->value[sizeof(var->value) - 1] = '\0'; // Ensure null-termination
+				}
+				else
+				{
+					// New variable, add it to the array
+					if (variableCount < 100)
+					{
+						strncpy(variables[variableCount].name, varName, sizeof(variables[variableCount].name) - 1);
+						variables[variableCount].name[sizeof(variables[variableCount].name) - 1] = '\0'; // Ensure null-termination
+						strncpy(variables[variableCount].value, varValue, sizeof(variables[variableCount].value) - 1);
+						variables[variableCount].value[sizeof(variables[variableCount].value) - 1] = '\0'; // Ensure null-termination
+						variableCount++;
+					}
+					else
+					{
+						printf("Too many variables, cannot add more.\n");
+					}
+				}
+				continue;
+			}
+            // Variable substitution
+			int index = charPtr - command; // the index of the char after the $ 
+            char *varName = command + index; // poiter to the char after the $ (name of the var)
+            Variable *var = findVariable(varName);
+            if (var != NULL)
+            {
+                printf("%s\n", var->value);
+                continue;
+            }
+            else
+            {
+                printf("Variable '%s' not found.\n", varName);
+                continue;
+            }
+        }
+
 		else if (strcmp(command, "!!") == 0)
 		{
 			// Repeat the last command
@@ -77,7 +151,6 @@ int main()
 		}
 		strcpy(last_command, command);
 		
-
 		/* parse command line */
 		i = 0;
 		token = strtok(command, " ");
