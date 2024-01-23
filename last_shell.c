@@ -11,6 +11,7 @@
 void handler(int num)
 {
 	write(STDOUT_FILENO, "", 0);
+	printf("\nYou typed Control-C!\n");
 }
 
 int main()
