@@ -52,25 +52,91 @@ int addVariable(char *name, char *value){
 
 int main()
 {
-	int i, amper, retid, status;
+	int i, amper, retid, status, flag_if = 0;
 	char *argv[10];
 	char command[1024];
+	char command_thenOrElse[1024];
 	char *token;
 	char prompt[256] = "\x1b[35mHello\x1b[0m";
 	char current_directory[1024];
 	char last_command[1024] = "";
 
+
 	signal(SIGINT, handler);
 	while (1)
 	{
-		printf("\x1b[35m%s: \x1b[0m", prompt);
+		if (flag_if) //print > if we are in if
+		{
+			printf("\x1b[35m> \x1b[0m");
+		}
+		else{
+			printf("\x1b[35m%s: \x1b[0m", prompt);
+		}
 		fgets(command, 1024, stdin);
 		command[strlen(command) - 1] = '\0'; // replace \n with \0
+
+		if (flag_if == 1){ //after if search for then
+			if(strncmp(command, "then", 4) == 0){
+				flag_if = 2;
+			}
+			else{
+				printf(" there are no 'then'\n");
+			}
+			continue;
+		}
+		
+		if (flag_if == 2){ //after then, save the command only if the if-command was 0
+			flag_if = 3;
+			if (status == 0)
+			{
+				strncpy(command_thenOrElse, command, sizeof(command_thenOrElse) -1);
+			}
+			continue;
+		}
+		if (flag_if == 3){ //after then+command, search for else
+			if(strncmp(command, "else", 4) == 0){
+				flag_if = 4;
+				continue;
+			}
+			else{
+				flag_if = 5;  //after then+command, if there is no else go to search fi
+			}
+				
+		}
+
+
+		if (flag_if == 4){ //after else, save the command only if the if-command was not success
+			flag_if = 5;
+			if (status != 0)
+			{
+				strncpy(command_thenOrElse, command, sizeof(command_thenOrElse) -1);
+			}
+			continue;
+		}
+		if (flag_if == 5){ //search for fi
+			if(strncmp(command, "fi", 2) == 0){
+				flag_if = 0;
+				strncpy(command, command_thenOrElse,  sizeof(command) -1);
+				command_thenOrElse[0] = '\0';
+			}
+			else{
+				printf(" there are no 'fi'\n");
+				continue;
+			}
+		}
+
+		if(strncmp(command, "if ", 3) == 0){ //if there is if in the command
+			flag_if =1;
+			// remove if from command
+            strncpy(command, command + 3, sizeof(command) -1);
+
+		}
+
+
 		if (strcmp(command, "exit") == 0 || strcmp(command, "exit()") == 0 || strcmp(command, "quit") == 0 )
 		{
 			return 0;
 		}
-
 		else if (strncmp(command, "prompt = ", 9) == 0)
         {
             // Change prompt command
