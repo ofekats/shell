@@ -8,7 +8,7 @@
 #include <string.h>
 #include <signal.h>
 
-void handler(int num)
+void handler()
 {
 	write(STDOUT_FILENO, "", 0);
 	printf("\nYou typed Control-C!\n");
@@ -52,13 +52,12 @@ int addVariable(char *name, char *value){
 
 int main()
 {
-	int i, amper, retid, status, flag_if = 0;
+	int i, amper, status, flag_if = 0;
 	char *argv[10];
 	char command[1024];
 	char command_thenOrElse[1024];
 	char *token;
 	char prompt[256] = "\x1b[35mHello\x1b[0m";
-	char current_directory[1024];
 	char last_command[1024] = "";
 
 
@@ -406,6 +405,6 @@ int main()
 		}
 		/* parent continues here */
         if (amper == 0)
-            retid = wait(&status);
+            wait(&status);
 	}
 }
