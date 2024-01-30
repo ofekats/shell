@@ -55,15 +55,17 @@ int main()
 	int i, amper, status, flag_if = 0;
 	char *argv[10];
 	char command[1024];
+	char new_command[1024];
 	char command_thenOrElse[1024];
 	char *token;
 	char prompt[256] = "\x1b[35mHello\x1b[0m";
 	char last_command[1024] = "";
 
 
-	signal(SIGINT, handler);
+	// signal(SIGINT, handler);
 	while (1)
 	{
+		signal(SIGINT, handler);
 		if (flag_if) //print > if we are in if
 		{
 			printf("\x1b[35m> \x1b[0m");
@@ -73,6 +75,37 @@ int main()
 		}
 		fgets(command, 1024, stdin);
 		command[strlen(command) - 1] = '\0'; // replace \n with \0
+
+		if (strcmp(command, "!!") == 0)
+		{
+			// Repeat the last command
+			if (strlen(last_command) > 0)
+			{
+				strcpy(command, last_command);
+			}
+			else
+			{
+				printf("No previous command to repeat.\n");
+				continue;
+			}
+		}
+		strcpy(last_command, command);
+
+		/* parse command line */
+		i = 0;
+		strcpy(new_command, command);
+		token = strtok(new_command, " ");
+		while (token != NULL)
+		{
+			argv[i] = token;
+			token = strtok(NULL, " ");
+			i++;
+		}
+		argv[i] = NULL;
+
+		/* Is command empty */
+		if (argv[0] == NULL)
+			continue;
 
 		if (flag_if == 1){ //after if search for then
 			if(strncmp(command, "then", 4) == 0){
@@ -192,7 +225,6 @@ int main()
 
 		else if (strchr(command, '$') != NULL)
         {
-			char *charPtr = strchr(command, '$');
 			char *equalSign = strchr(command, '=');
 			if (equalSign != NULL)
 			{
@@ -210,59 +242,33 @@ int main()
 				else
 				{
 					// New variable, add it to the array
-					if(addVariable(varName, varValue) != 0){
+					if(addVariable(varName + 1, varValue) != 0){
 						printf("Too many variables, cannot add more.\n");
 					}
 				}
 				continue;
 			}
             // Variable substitution
-			int index = charPtr - command; // the index of the char after the $ 
-            char *varName = command + index + 1; // poiter to the char after the $ (name of the var)
-            Variable *var = findVariable(varName);
-            if (var != NULL)
-            {
-                printf("%s", var->value);
-                continue;
-            }
-            else
-            {
-                printf("Variable '%s' not found.\n", varName);
-                continue;
-            }
-			continue;
+			int j = 0;
+			while(argv[j] != NULL){
+
+				if (strchr(argv[j], '$') != NULL){
+					
+					char *varName = argv[j]; // poiter to the char after the $ (name of the var)
+					Variable *var = findVariable(varName+1);
+					if (var != NULL)
+					{
+						argv[j] = var->value;
+					}
+					else
+					{
+						printf("Variable '%s' not found.\n", varName+1);
+					}
+				}
+				j++;
+			}
+
         }
-
-		else if (strcmp(command, "!!") == 0)
-		{
-			// Repeat the last command
-			if (strlen(last_command) > 0)
-			{
-				strcpy(command, last_command);
-				printf("Repeating last command: %s\n", command);
-			}
-			else
-			{
-				printf("No previous command to repeat.\n");
-				continue;
-			}
-		}
-		strcpy(last_command, command);
-		
-		/* parse command line */
-		i = 0;
-		token = strtok(command, " ");
-		while (token != NULL)
-		{
-			argv[i] = token;
-			token = strtok(NULL, " ");
-			i++;
-		}
-		argv[i] = NULL;
-
-		/* Is command empty */
-		if (argv[0] == NULL)
-			continue;
 
         /* Does command line end with & */ 
         if (! strcmp(argv[i - 1], "&")) {
@@ -304,6 +310,28 @@ int main()
 					argv[i] = NULL;
 					break;
 				}
+
+				// if we have <
+				if (strcmp(argv[i], "<") == 0)
+				{
+					char *filename = argv[i + 1];
+					int fd1 = open(filename, O_RDONLY , 0644);
+					if (fd1 < 0)
+					{
+						perror("Error");
+						return 1;
+					}
+					if (dup2(fd1, 0) < 0) // 0 == stdin
+					{
+						perror("Error");
+						return 1;
+					}
+					close(fd1);
+					argv[i] = NULL;
+					break;
+				}
+
+
                 if (strcmp(argv[i], "2>") == 0)
 				{
 					char *filename = argv[i + 1];
