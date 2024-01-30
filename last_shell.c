@@ -91,23 +91,7 @@ int main()
 		}
 		strcpy(last_command, command);
 
-		/* parse command line */
-		i = 0;
-		strcpy(new_command, command);
-		token = strtok(new_command, " ");
-		while (token != NULL)
-		{
-			argv[i] = token;
-			token = strtok(NULL, " ");
-			i++;
-		}
-		argv[i] = NULL;
-
-		/* Is command empty */
-		if (argv[0] == NULL)
-			continue;
-
-		if (flag_if == 1){ //after if search for then
+				if (flag_if == 1){ //after if search for then
 			if(strncmp(command, "then", 4) == 0){
 				flag_if = 2;
 			}
@@ -157,11 +141,26 @@ int main()
 			}
 		}
 
+		/* parse command line */
+		i = 0;
+		strcpy(new_command, command);
+		token = strtok(new_command, " ");
+		while (token != NULL)
+		{
+			argv[i] = token;
+			token = strtok(NULL, " ");
+			i++;
+		}
+		argv[i] = NULL;
+
+		/* Is command empty */
+		if (argv[0] == NULL)
+			continue;
+
 		if(strncmp(command, "if ", 3) == 0){ //if there is if in the command
 			flag_if =1;
 			// remove if from command
             strncpy(command, command + 3, sizeof(command) -1);
-
 		}
 
 
@@ -198,7 +197,7 @@ int main()
 		else if (strncmp(command, "read ", 5) == 0)
         {
             // Read command
-            char *varName = command + 6;
+            char *varName = command + 5;
             Variable *var = findVariable(varName);
             if (var != NULL)
             {
@@ -215,6 +214,12 @@ int main()
 				// New variable, add it to the array
 				char value[1024];
 				fgets(value, sizeof(value), stdin);
+				// Remove newline character if present
+                size_t len = strlen(value);
+                if (len > 0 && value[len - 1] == '\n')
+                {
+                    value[len - 1] = '\0';
+                }
 				if (addVariable(varName, value) != 0)
 				{
 					printf("Too many variables, cannot add more.\n");
