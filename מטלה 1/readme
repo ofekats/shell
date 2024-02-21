@@ -1,0 +1,48 @@
+ReadMe:
+
+To run this task you should run "make".
+Then run "./myshell"
+
+Our Tests:
+
+ls | wc -l
+ls | grep a | wc -l > a.txt
+ls | grep a | wc -l >> a.txt
+sort date 2> filedate
+ls -l >> filedate
+prompt = hi
+echo hello
+echo $?
+wc -l < date
+echo $?
+mkdir newdir
+cd newdir
+pwd
+!!
+ls | grep file | wc -l | head -1
+cat > file.txt
+hello
+Control-D
+$student1 = MoriyaEster
+read student2
+Ofek
+echo hii $student1 and $student2 you did a great job!!!!!
+if cat file.txt
+then
+echo great!
+else
+echo bad!
+fi
+if wc -l < filename
+then
+echo mistake
+else
+echo correct
+fi
+if date
+then
+echo great!
+fi
+Control-C
+quit
+
