@@ -27,8 +27,6 @@ You will be presented with a prompt where you can enter commands. Here are some 
 *   `prompt = new_prompt`: Change the shell prompt.
 *   `cd /path/to/directory`: Change the current working directory.
 *   `read variable_name`: Read input from stdin and assign it to a variable.
-*   `variable=value`: Set a variable.
-*   `variable=$variable_name`: Substitute the value of an environment variable in a command.
 *   `command > file.txt`: Redirect output to a file.
 *   `command < file.txt`: Redirect input from a file.
 *   `command >> file.txt`: Append output to a file.
