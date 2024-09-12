@@ -14,7 +14,7 @@ It also supports conditional execution with `if`, `then`, `else`, and `fi` state
 - **Prompt Customization:** Change the shell prompt using `prompt =`.
 
 ## Installation
-after cloning the git repositury do:
+After cloning the repository, do the following:
 ```bash
   make
   ./myshell
