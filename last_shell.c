@@ -268,11 +268,19 @@ int main()
 				char *varName = strtok(command, " ");
 				char *varValue = equalSign + 2; // equalSign is \0, equalSign + 1 is space
 				Variable *var = findVariable(varName + 1);
-				if (var != NULL)
+				if (var != NULL && flag_if == 0)
 				{
 					// Variable already exists, update its value
 					strncpy(var->value, varValue, sizeof(var->value) - 1);
 					var->value[sizeof(var->value) - 1] = '\0'; // Ensure null-termination
+				}
+				else if(flag_if != 0){ //if the command from if just check if they are equal and update the status (to execute the then or else) 
+					if(strcmp(varValue, var->value) == 0){
+						status = 0;
+					}else{
+						status = 1;
+					}
+					continue;
 				}
 				else
 				{
